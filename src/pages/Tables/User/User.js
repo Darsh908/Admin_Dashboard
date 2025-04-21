@@ -33,6 +33,8 @@ const UserTables = () => {
   const [sortConfig, setSortConfig] = useState({ key: "", direction: "asc" });
   const [currentPage, setCurrentPage] = useState(1); // Current page
   const [rowsPerPage, setRowsPerPage] = useState(5); // Rows per page
+  const [modal_view, setmodal_view] = useState(false); // State for view modal
+  const [viewRowData, setViewRowData] = useState(null); // Data of the row being viewed
 
   const [tableData, setTableData] = useState([
     {
@@ -347,6 +349,15 @@ const UserTables = () => {
     setCurrentPage(pageNumber);
   };
 
+  // Open view modal and populate data
+  const handleView = (id) => {
+    const rowToView = tableData.find((row) => row.id === id);
+    if (rowToView) {
+      setViewRowData(rowToView); // Set the data of the row to view
+      setmodal_view(true); // Open the view modal
+    }
+  };
+
   return (
     <React.Fragment>
       <div className="page-content">
@@ -535,7 +546,12 @@ const UserTables = () => {
                                     </button>
                                   </div>
                                   <div className="view">
-                                    <button className="btn btn-sm text-secondary view-item-btn">
+                                    <button
+                                      className="btn btn-sm text-secondary view-item-btn"
+                                      onClick={() => handleView(row.id)}
+                                      data-bs-toggle="modal"
+                                      data-bs-target="#viewModal"
+                                    >
                                       <i className="ri-eye-fill" />
                                     </button>
                                   </div>
@@ -1009,6 +1025,60 @@ const UserTables = () => {
             onClick={confirmDelete}
           >
             Delete
+          </button>
+        </ModalFooter>
+      </Modal>
+
+      {/* View Modal */}
+      <Modal
+        isOpen={modal_view}
+        toggle={() => setmodal_view(!modal_view)}
+        centered
+      >
+        <ModalHeader
+          toggle={() => setmodal_view(!modal_view)}
+          className="bg-info-subtle p-3"
+        >
+          View User Details
+        </ModalHeader>
+        <ModalBody>
+          {viewRowData && (
+            <div>
+              <p>
+                <strong>Name:</strong> {viewRowData.name}
+              </p>
+              <p>
+                <strong>Email:</strong> {viewRowData.email}
+              </p>
+              <p>
+                <strong>User Type:</strong>{" "}
+                {userTypes.find((type) => type.id === viewRowData.userType)
+                  ?.label || "N/A"}
+              </p>
+              <p>
+                <strong>Designation:</strong>{" "}
+                {designations.find(
+                  (designation) => designation.id === viewRowData.designation
+                )?.label || "N/A"}
+              </p>
+              <p>
+                <strong>Date:</strong> {viewRowData.date}
+              </p>
+              <p>
+                <strong>Status:</strong>{" "}
+                {statuses.find((status) => status.id === viewRowData.status)
+                  ?.label || "N/A"}
+              </p>
+            </div>
+          )}
+        </ModalBody>
+        <ModalFooter>
+          <button
+            type="button"
+            className="btn btn-light"
+            onClick={() => setmodal_view(false)}
+          >
+            Close
           </button>
         </ModalFooter>
       </Modal>
