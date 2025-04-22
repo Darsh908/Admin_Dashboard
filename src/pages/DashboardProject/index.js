@@ -9,7 +9,7 @@ const DashboardProject = () => {
     <React.Fragment>
       <div className="page-content">
         <Container fluid>
-          <BreadCrumb title="USERS LIST" pageTitle="Users" />
+          <BreadCrumb title="Dashboard" />
           <Row className="project-wrapper">
             <Widgets />
           </Row>
