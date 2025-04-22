@@ -19,6 +19,7 @@ import Widgets from "../DashboardProject/Widgets";
 import { format } from "date-fns";
 import { designations, statuses } from "./Constants";
 import ViewCustomerDetailsModal from "./ViewCustomerDetailsModal";
+import DeleteConfirmationModal from "./DeleteConfirmationModal";
 
 const CustomerTables = () => {
   const [modal_list, setmodal_list] = useState(false);
@@ -94,6 +95,10 @@ const CustomerTables = () => {
 
   const tog_view = () => {
     setmodal_view(!modal_view);
+  };
+
+  const tog_delete = () => {
+    setmodal_delete(!modal_delete);
   };
 
   const handleInputChange = (e) => {
@@ -962,34 +967,11 @@ const CustomerTables = () => {
       </Modal>
 
       {/* Remove Modal */}
-      <Modal
-        isOpen={modal_delete}
-        toggle={() => setmodal_delete(!modal_delete)}
-        centered
-      >
-        <ModalHeader toggle={() => setmodal_delete(!modal_delete)}>
-          Confirm Deletion
-        </ModalHeader>
-        <ModalBody>
-          <p>Are you sure you want to delete this record?</p>
-        </ModalBody>
-        <ModalFooter>
-          <button
-            type="button"
-            className="btn btn-light"
-            onClick={() => setmodal_delete(false)}
-          >
-            Cancel
-          </button>
-          <button
-            type="button"
-            className="btn btn-danger"
-            onClick={confirmDelete}
-          >
-            Delete
-          </button>
-        </ModalFooter>
-      </Modal>
+      <DeleteConfirmationModal
+        tog_delete={tog_delete}
+        modal_delete={modal_delete}
+        confirmDelete={confirmDelete}
+      />
 
       {/* View Modal */}
       <ViewCustomerDetailsModal
