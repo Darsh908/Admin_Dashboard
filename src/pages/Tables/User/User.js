@@ -22,19 +22,19 @@ import { format } from "date-fns";
 const UserTables = () => {
   const [modal_list, setmodal_list] = useState(false);
   const [modal_delete, setmodal_delete] = useState(false);
+  const [rowToDelete, setRowToDelete] = useState(null); // Track the row to delete
+  const [deleteAllSelected, setDeleteAllSelected] = useState(false); // Track if deleting all selected rows
   const [modal_edit, setmodal_edit] = useState(false); // State for edit modal
+  const [editRowId, setEditRowId] = useState(null); // Track the row being edited
+  const [modal_view, setmodal_view] = useState(false); // State for view modal
+  const [viewRowData, setViewRowData] = useState(null); // Data of the row being viewed
   const [selectAll, setSelectAll] = useState(false); // State to track "select all" checkbox
   const [selectedRows, setSelectedRows] = useState([]); // State to track selected rows
   const [searchQuery, setSearchQuery] = useState(""); // State for search query
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState(""); // Debounced search query
-  const [editRowId, setEditRowId] = useState(null); // Track the row being edited
-  const [rowToDelete, setRowToDelete] = useState(null); // Track the row to delete
-  const [deleteAllSelected, setDeleteAllSelected] = useState(false); // Track if deleting all selected rows
   const [sortConfig, setSortConfig] = useState({ key: "", direction: "asc" });
   const [currentPage, setCurrentPage] = useState(1); // Current page
   const [rowsPerPage, setRowsPerPage] = useState(5); // Rows per page
-  const [modal_view, setmodal_view] = useState(false); // State for view modal
-  const [viewRowData, setViewRowData] = useState(null); // Data of the row being viewed
 
   const [tableData, setTableData] = useState([
     {
@@ -104,8 +104,6 @@ const UserTables = () => {
   ];
 
   document.title = "Users | Admin Dashboard";
-
-  // From Here
 
   const tog_list = () => {
     setmodal_list(!modal_list);
