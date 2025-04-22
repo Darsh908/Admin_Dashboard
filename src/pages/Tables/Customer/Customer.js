@@ -903,31 +903,6 @@ const CustomerTables = () => {
             </div>
 
             <div className="mb-3">
-              <label htmlFor="edit-designation" className="form-label">
-                Designation
-              </label>
-              <select
-                id="edit-designation"
-                name="designation"
-                className="form-control"
-                value={newUser.designation}
-                onChange={(e) =>
-                  setNewUser({
-                    ...newUser,
-                    designation: parseInt(e.target.value),
-                  })
-                }
-                required
-              >
-                <option value="">Select Designation</option>
-                {designations.map((designation) => (
-                  <option key={designation.id} value={designation.id}>
-                    {designation.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="mb-3">
               <label htmlFor="edit-date" className="form-label">
                 Date
               </label>
@@ -948,28 +923,64 @@ const CustomerTables = () => {
                 required
               />
             </div>
-            <div className="mb-3">
-              <label htmlFor="edit-status" className="form-label">
-                Status
-              </label>
-              <select
-                id="edit-status"
-                name="status"
-                className="form-control"
-                value={newUser.status}
-                onChange={(e) =>
-                  setNewUser({ ...newUser, status: parseInt(e.target.value) })
-                }
-                required
-              >
-                <option value="">Select Status</option>
-                {statuses.map((status) => (
-                  <option key={status.id} value={status.id}>
-                    {status.label}
-                  </option>
-                ))}
-              </select>
-            </div>
+
+            <Row>
+              <Col md={6}>
+                <div className="mb-3">
+                  <label htmlFor="edit-designation" className="form-label">
+                    Designation
+                  </label>
+                  <select
+                    id="edit-designation"
+                    name="designation"
+                    className="form-control"
+                    value={newUser.designation}
+                    onChange={(e) =>
+                      setNewUser({
+                        ...newUser,
+                        designation: parseInt(e.target.value),
+                      })
+                    }
+                    required
+                  >
+                    <option value="">Select Designation</option>
+                    {designations.map((designation) => (
+                      <option key={designation.id} value={designation.id}>
+                        {designation.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </Col>
+
+              <Col md={6}>
+                <div className="mb-3">
+                  <label htmlFor="edit-status" className="form-label">
+                    Status
+                  </label>
+                  <select
+                    id="edit-status"
+                    name="status"
+                    className="form-control"
+                    value={newUser.status}
+                    onChange={(e) =>
+                      setNewUser({
+                        ...newUser,
+                        status: parseInt(e.target.value),
+                      })
+                    }
+                    required
+                  >
+                    <option value="">Select Status</option>
+                    {statuses.map((status) => (
+                      <option key={status.id} value={status.id}>
+                        {status.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </Col>
+            </Row>
           </ModalBody>
           <ModalFooter>
             <button
