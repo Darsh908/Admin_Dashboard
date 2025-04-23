@@ -14,15 +14,16 @@ import {
 } from "reactstrap";
 import BreadCrumb from "../../Components/Common/BreadCrumb";
 import { Link } from "react-router-dom";
-import Flatpickr from "react-flatpickr";
 import Widgets from "../DashboardProject/Widgets";
 import { format } from "date-fns";
 import ViewUserDetailsModal from "./ViewUserDetailsModal";
 import { userTypes, designations, statuses } from "./Constants";
-import DeleteConfirmationModal from "../Customer/DeleteConfirmationModal";
+import DeleteModal from "../../Components/Common/DeleteModal";
+import EditUserModal from "./EditUserModal";
+import AddUserModal from "./AddUserModal";
 
 const UserTables = () => {
-  const [modal_list, setmodal_list] = useState(false);
+  const [modal_add, setmodal_add] = useState(false);
   const [modal_delete, setmodal_delete] = useState(false);
   const [rowToDelete, setRowToDelete] = useState(null); // Track the row to delete
   const [modal_edit, setmodal_edit] = useState(false); // State for edit modal
@@ -88,16 +89,21 @@ const UserTables = () => {
 
   document.title = "Users | Admin Dashboard";
 
-  const tog_add = () => {
-    setmodal_list(!modal_list);
+  const toggle_add = () => {
+    setmodal_add(!modal_add);
     resetForm();
   };
 
-  const tog_view = () => {
+  const toggle_edit = () => {
+    setmodal_edit(!modal_edit);
+    resetForm();
+  };
+
+  const toggle_view = () => {
     setmodal_view(!modal_view);
   };
 
-  const tog_delete = () => {
+  const toggle_delete = () => {
     setmodal_delete(!modal_delete);
   };
 
@@ -138,7 +144,7 @@ const UserTables = () => {
 
     setTableData([...tableData, newUserData]); // Update table data
     resetForm();
-    setmodal_list(false); // Close modal
+    setmodal_add(false); // Close modal
   };
 
   // Reset Form
@@ -285,7 +291,7 @@ const UserTables = () => {
   };
 
   // Handle form submission for editing
-  const handleEditSubmit = (e) => {
+  const handleEditUser = (e) => {
     e.preventDefault();
 
     // Format the date before saving
@@ -350,7 +356,7 @@ const UserTables = () => {
                           <Button
                             color="success"
                             className="add-btn me-1"
-                            onClick={() => tog_add()}
+                            onClick={() => toggle_add()}
                             id="create-btn"
                           >
                             <i className="ri-add-line align-bottom me-1" />
@@ -642,344 +648,32 @@ const UserTables = () => {
       </div>
 
       {/* Add Modal */}
-      <Modal
-        isOpen={modal_list}
-        toggle={() => {
-          tog_add();
-        }}
-        centered
-      >
-        <ModalHeader
-          className="bg-info-subtle p-3"
-          toggle={() => {
-            tog_add();
-          }}
-        >
-          Add User
-        </ModalHeader>
-        <form className="tablelist-form" onSubmit={handleAddUser}>
-          <ModalBody>
-            <div className="mb-3">
-              <label htmlFor="username-field" className="form-label">
-                Name
-              </label>
-              <input
-                type="text"
-                id="username-field"
-                name="name"
-                className="form-control"
-                placeholder="Enter Name"
-                value={newUser.name}
-                onChange={handleInputChange}
-                required
-              />
-            </div>
-
-            <div className="mb-3">
-              <label htmlFor="email-field" className="form-label">
-                Email
-              </label>
-              <input
-                type="email"
-                id="email-field"
-                name="email"
-                className="form-control"
-                placeholder="Enter Email"
-                value={newUser.email}
-                onChange={handleInputChange}
-                required
-              />
-            </div>
-
-            <div className="mb-3">
-              <label htmlFor="user-type-field" className="form-label">
-                User Type
-              </label>
-              <select
-                className="form-control"
-                name="userType"
-                id="user-type-field"
-                value={newUser.userType}
-                onChange={handleInputChange}
-                required
-              >
-                <option value="">Select User Type</option>
-                {userTypes.map((type) => (
-                  <option key={type.id} value={type.id}>
-                    {type.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="mb-3">
-              <label htmlFor="date-field" className="form-label">
-                Date
-              </label>
-              <Flatpickr
-                id="date-field"
-                name="date"
-                className="form-control"
-                options={{
-                  dateFormat: "d M, Y",
-                }}
-                value={newUser.date}
-                onChange={(date) =>
-                  setNewUser({
-                    ...newUser,
-                    date: date.length ? date[0].toISOString() : "", // Ensure a valid date is set
-                  })
-                }
-                placeholder="Select Date"
-                required
-              />
-            </div>
-
-            <Row>
-              <Col md={6}>
-                <div className="mb-3">
-                  <label htmlFor="designation-field" className="form-label">
-                    Designation
-                  </label>
-                  <select
-                    className="form-control"
-                    name="designation"
-                    id="designation-field"
-                    value={newUser.designation}
-                    onChange={handleInputChange}
-                    required
-                  >
-                    <option value="">Select Designation</option>
-                    {designations.map((designation) => (
-                      <option key={designation.id} value={designation.id}>
-                        {designation.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </Col>
-              <Col md={6}>
-                <div className="mb-3">
-                  <label htmlFor="status-field" className="form-label">
-                    Status
-                  </label>
-                  <select
-                    className="form-control"
-                    name="status"
-                    id="status-field"
-                    value={newUser.status}
-                    onChange={handleInputChange}
-                    required
-                  >
-                    <option value="">Select Status</option>
-                    {statuses.map((status) => (
-                      <option key={status.id} value={status.id}>
-                        {status.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </Col>
-            </Row>
-          </ModalBody>
-          <ModalFooter>
-            <div className="hstack gap-2 justify-content-end">
-              <button
-                type="button"
-                className="btn btn-light"
-                onClick={() => {
-                  resetForm();
-                  setmodal_list(false);
-                }}
-              >
-                Close
-              </button>
-              <button type="submit" className="btn btn-success" id="add-btn">
-                Add User
-              </button>
-              {/* <button type="button" className="btn btn-success" id="edit-btn">Update</button> */}
-            </div>
-          </ModalFooter>
-        </form>
-      </Modal>
-
-      {/* Edit Modal */}
-      <Modal
-        isOpen={modal_edit}
-        toggle={() => setmodal_edit(!modal_edit)}
-        centered
-      >
-        <ModalHeader
-          toggle={() => setmodal_edit(!modal_edit)}
-          className="bg-info-subtle p-3"
-        >
-          Edit User
-        </ModalHeader>
-        <form onSubmit={handleEditSubmit}>
-          <ModalBody>
-            <div className="mb-3">
-              <label htmlFor="edit-name" className="form-label">
-                Name
-              </label>
-              <input
-                type="text"
-                id="edit-name"
-                name="name"
-                className="form-control"
-                value={newUser.name}
-                onChange={(e) =>
-                  setNewUser({ ...newUser, name: e.target.value })
-                }
-                required
-              />
-            </div>
-
-            <div className="mb-3">
-              <label htmlFor="edit-email" className="form-label">
-                Email
-              </label>
-              <input
-                type="email"
-                id="edit-email"
-                name="email"
-                className="form-control"
-                value={newUser.email}
-                onChange={(e) =>
-                  setNewUser({ ...newUser, email: e.target.value })
-                }
-                required
-              />
-            </div>
-
-            <div className="mb-3">
-              <label htmlFor="edit-userType" className="form-label">
-                User Type
-              </label>
-              <select
-                id="edit-userType"
-                name="userType"
-                className="form-control"
-                value={newUser.userType}
-                onChange={(e) =>
-                  setNewUser({ ...newUser, userType: parseInt(e.target.value) })
-                }
-                required
-              >
-                <option value="">Select User Type</option>
-                {userTypes.map((type) => (
-                  <option key={type.id} value={type.id}>
-                    {type.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="mb-3">
-              <label htmlFor="edit-date" className="form-label">
-                Date
-              </label>
-
-              <Flatpickr
-                id="edit-date"
-                className="form-control"
-                options={{
-                  dateFormat: "d M, Y",
-                }}
-                value={newUser.date}
-                onChange={(date) =>
-                  setNewUser({
-                    ...newUser,
-                    date: date.length ? date[0].toISOString() : "",
-                  })
-                }
-                required
-              />
-            </div>
-
-            <Row>
-              <Col md={6}>
-                <div className="mb-3">
-                  <label htmlFor="edit-designation" className="form-label">
-                    Designation
-                  </label>
-                  <select
-                    id="edit-designation"
-                    name="designation"
-                    className="form-control"
-                    value={newUser.designation}
-                    onChange={(e) =>
-                      setNewUser({
-                        ...newUser,
-                        designation: parseInt(e.target.value),
-                      })
-                    }
-                    required
-                  >
-                    <option value="">Select Designation</option>
-                    {designations.map((designation) => (
-                      <option key={designation.id} value={designation.id}>
-                        {designation.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </Col>
-              <Col md={6}>
-                <div className="mb-3">
-                  <label htmlFor="edit-status" className="form-label">
-                    Status
-                  </label>
-                  <select
-                    id="edit-status"
-                    name="status"
-                    className="form-control"
-                    value={newUser.status}
-                    onChange={(e) =>
-                      setNewUser({
-                        ...newUser,
-                        status: parseInt(e.target.value),
-                      })
-                    }
-                    required
-                  >
-                    <option value="">Select Status</option>
-                    {statuses.map((status) => (
-                      <option key={status.id} value={status.id}>
-                        {status.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </Col>
-            </Row>
-          </ModalBody>
-          <ModalFooter>
-            <button
-              type="button"
-              className="btn btn-light"
-              onClick={() => setmodal_edit(false)}
-            >
-              Cancel
-            </button>
-            <button type="submit" className="btn btn-success">
-              Save Changes
-            </button>
-          </ModalFooter>
-        </form>
-      </Modal>
-
-      {/* Remove Modal */}
-      <DeleteConfirmationModal
-        tog_delete={tog_delete}
-        modal_delete={modal_delete}
-        confirmDelete={confirmDelete}
+      <AddUserModal
+        show={modal_add}
+        handleAddUser={handleAddUser}
+        newUser={newUser}
+        setNewUser={setNewUser}
+        toggle_add={toggle_add}
       />
 
-      {/* View Modal */}
+      <EditUserModal
+        show={modal_edit}
+        handleEditUser={handleEditUser}
+        newUser={newUser}
+        setNewUser={setNewUser}
+        toggle_edit={toggle_edit}
+      />
+
+      <DeleteModal
+        show={modal_delete}
+        confirmDelete={confirmDelete}
+        toggle_delete={toggle_delete}
+      />
+
       <ViewUserDetailsModal
-        tog_view={tog_view}
-        viewRowData={viewRowData}
-        modal_view={modal_view}
+        show={modal_view}
+        data={viewRowData}
+        toggle_view={toggle_view}
       />
     </React.Fragment>
   );

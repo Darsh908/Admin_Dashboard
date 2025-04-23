@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Button,
   Card,
@@ -14,15 +14,16 @@ import {
 } from "reactstrap";
 import BreadCrumb from "../../Components/Common/BreadCrumb";
 import { Link } from "react-router-dom";
-import Flatpickr from "react-flatpickr";
 import Widgets from "../DashboardProject/Widgets";
 import { format } from "date-fns";
 import { designations, statuses } from "./Constants";
 import ViewCustomerDetailsModal from "./ViewCustomerDetailsModal";
-import DeleteConfirmationModal from "./DeleteConfirmationModal";
+import DeleteModal from "../../Components/Common/DeleteModal";
+import EditCustomerModal from "./EditCustomerModal";
+import AddCustomerModal from "./AddCustomerModal";
 
 const CustomerTables = () => {
-  const [modal_list, setmodal_list] = useState(false);
+  const [modal_add, setmodal_add] = useState(false);
   const [modal_delete, setmodal_delete] = useState(false);
   const [modal_edit, setmodal_edit] = useState(false); // State for edit modal
   const [selectAll, setSelectAll] = useState(false); // State to track "select all" checkbox
@@ -88,22 +89,22 @@ const CustomerTables = () => {
 
   document.title = "Customers | Admin Dashboard";
 
-  const tog_list = () => {
-    setmodal_list(!modal_list);
+  const toggle_add = () => {
+    setmodal_add(!modal_add);
     resetForm();
   };
 
-  const tog_view = () => {
-    setmodal_view(!modal_view);
+  const toggle_edit = () => {
+    setmodal_edit(!modal_edit);
+    resetForm();
   };
 
-  const tog_delete = () => {
+  const toggle_delete = () => {
     setmodal_delete(!modal_delete);
   };
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setNewCustomer({ ...newCustomer, [name]: value });
+  const toggle_view = () => {
+    setmodal_view(!modal_view);
   };
 
   // Handle form submission
@@ -138,7 +139,45 @@ const CustomerTables = () => {
 
     setTableData([...tableData, newCustomerData]); // Update table data
     resetForm();
-    setmodal_list(false); // Close modal
+    setmodal_add(false); // Close modal
+  };
+
+  // Open edit modal and populate data
+  const handleEdit = (id) => {
+    const rowToEdit = tableData.find((row) => row.id === id);
+    if (rowToEdit) {
+      setNewCustomer({
+        name: rowToEdit.name,
+        email: rowToEdit.email,
+        companyName: rowToEdit.companyName,
+        designation: rowToEdit.designation,
+        date: rowToEdit.date,
+        status: rowToEdit.status,
+      });
+      setEditRowId(id);
+      setmodal_edit(true);
+    }
+  };
+
+  // Handle form submission for editing
+  const handleEditCustomer = (e) => {
+    e.preventDefault();
+
+    // Format the date before saving
+    const formattedDate = newCustomer.date
+      ? format(new Date(newCustomer.date), "dd MMM, yyyy")
+      : "";
+
+    const updatedTableData = tableData.map((row) =>
+      row.id === editRowId
+        ? { ...row, ...newCustomer, date: formattedDate } // Update the edited row with formatted date
+        : row
+    );
+
+    setTableData(updatedTableData);
+    setmodal_edit(false); // Close modal
+    setEditRowId(null); // Reset edit row ID
+    resetForm();
   };
 
   // Reset Form
@@ -263,44 +302,6 @@ const CustomerTables = () => {
     setmodal_delete(false); // Close modal
   };
 
-  // Open edit modal and populate data
-  const handleEdit = (id) => {
-    const rowToEdit = tableData.find((row) => row.id === id);
-    if (rowToEdit) {
-      setNewCustomer({
-        name: rowToEdit.name,
-        email: rowToEdit.email,
-        companyName: rowToEdit.companyName,
-        designation: rowToEdit.designation,
-        date: rowToEdit.date,
-        status: rowToEdit.status,
-      });
-      setEditRowId(id);
-      setmodal_edit(true);
-    }
-  };
-
-  // Handle form submission for editing
-  const handleEditSubmit = (e) => {
-    e.preventDefault();
-
-    // Format the date before saving
-    const formattedDate = newCustomer.date
-      ? format(new Date(newCustomer.date), "dd MMM, yyyy")
-      : "";
-
-    const updatedTableData = tableData.map((row) =>
-      row.id === editRowId
-        ? { ...row, ...newCustomer, date: formattedDate } // Update the edited row with formatted date
-        : row
-    );
-
-    setTableData(updatedTableData);
-    setmodal_edit(false); // Close modal
-    setEditRowId(null); // Reset edit row ID
-    resetForm();
-  };
-
   // Calculate the paginated data
   const indexOfLastRow = currentPage * rowsPerPage;
   const indexOfFirstRow = indexOfLastRow - rowsPerPage;
@@ -346,7 +347,7 @@ const CustomerTables = () => {
                           <Button
                             color="success"
                             className="add-btn me-1"
-                            onClick={() => tog_list()}
+                            onClick={() => toggle_add()}
                             id="create-btn"
                           >
                             <i className="ri-add-line align-bottom me-1" />
@@ -647,337 +648,35 @@ const CustomerTables = () => {
       </div>
 
       {/* Add Modal */}
-      <Modal
-        isOpen={modal_list}
-        toggle={() => {
-          tog_list();
-        }}
-        centered
-      >
-        <ModalHeader
-          className="bg-info-subtle p-3"
-          toggle={() => {
-            tog_list();
-          }}
-        >
-          Add Customer
-        </ModalHeader>
-        <form className="tablelist-form" onSubmit={handleAddCustomer}>
-          <ModalBody>
-            <div className="mb-3">
-              <label htmlFor="name-field" className="form-label">
-                Name
-              </label>
-              <input
-                type="text"
-                id="name-field"
-                name="name"
-                className="form-control"
-                placeholder="Enter Name"
-                value={newCustomer.name}
-                onChange={handleInputChange}
-                required
-              />
-            </div>
-
-            <div className="mb-3">
-              <label htmlFor="email-field" className="form-label">
-                Email
-              </label>
-              <input
-                type="email"
-                id="email-field"
-                name="email"
-                className="form-control"
-                placeholder="Enter Email"
-                value={newCustomer.email}
-                onChange={handleInputChange}
-                required
-              />
-            </div>
-
-            <div className="mb-3">
-              <label htmlFor="company-name-field" className="form-label">
-                Company Name
-              </label>
-              <input
-                type="text"
-                id="company-name-field"
-                name="companyName"
-                className="form-control"
-                placeholder="Enter Company Name"
-                value={newCustomer.companyName}
-                onChange={handleInputChange}
-                required
-              />
-            </div>
-
-            <div className="mb-3">
-              <label htmlFor="date-field" className="form-label">
-                Date
-              </label>
-              <Flatpickr
-                id="date-field"
-                name="date"
-                className="form-control"
-                options={{
-                  dateFormat: "d M, Y",
-                }}
-                value={newCustomer.date}
-                onChange={(date) =>
-                  setNewCustomer({
-                    ...newCustomer,
-                    date: date.length ? date[0].toISOString() : "", // Ensure a valid date is set
-                  })
-                }
-                placeholder="Select Date"
-                required
-              />
-            </div>
-
-            <Row>
-              <Col md={6}>
-                <div className="mb-3">
-                  <label htmlFor="designation-field" className="form-label">
-                    Designation
-                  </label>
-                  <select
-                    className="form-control"
-                    name="designation"
-                    id="designation-field"
-                    value={newCustomer.designation}
-                    onChange={handleInputChange}
-                    required
-                  >
-                    <option value="">Select Designation</option>
-                    {designations.map((designation) => (
-                      <option key={designation.id} value={designation.id}>
-                        {designation.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </Col>
-              <Col md={6}>
-                <div className="mb-3">
-                  <label htmlFor="status-field" className="form-label">
-                    Status
-                  </label>
-                  <select
-                    className="form-control"
-                    name="status"
-                    id="status-field"
-                    value={newCustomer.status}
-                    onChange={handleInputChange}
-                    required
-                  >
-                    <option value="">Select Status</option>
-                    {statuses.map((status) => (
-                      <option key={status.id} value={status.id}>
-                        {status.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </Col>
-            </Row>
-          </ModalBody>
-          <ModalFooter>
-            <div className="hstack gap-2 justify-content-end">
-              <button
-                type="button"
-                className="btn btn-light"
-                onClick={() => {
-                  resetForm();
-                  setmodal_list(false);
-                }}
-              >
-                Close
-              </button>
-              <button type="submit" className="btn btn-success" id="add-btn">
-                Add Customer
-              </button>
-              {/* <button type="button" className="btn btn-success" id="edit-btn">Update</button> */}
-            </div>
-          </ModalFooter>
-        </form>
-      </Modal>
+      <AddCustomerModal
+        show={modal_add}
+        handleAddCustomer={handleAddCustomer}
+        newCustomer={newCustomer}
+        setNewCustomer={setNewCustomer}
+        toggle_add={toggle_add}
+      />
 
       {/* Edit Modal */}
-      <Modal
-        isOpen={modal_edit}
-        toggle={() => setmodal_edit(!modal_edit)}
-        centered
-      >
-        <ModalHeader
-          toggle={() => setmodal_edit(!modal_edit)}
-          className="bg-info-subtle p-3"
-        >
-          Edit Customer
-        </ModalHeader>
-        <form onSubmit={handleEditSubmit}>
-          <ModalBody>
-            <div className="mb-3">
-              <label htmlFor="edit-name" className="form-label">
-                Name
-              </label>
-              <input
-                type="text"
-                id="edit-name"
-                name="name"
-                className="form-control"
-                value={newCustomer.name}
-                onChange={(e) =>
-                  setNewCustomer({ ...newCustomer, name: e.target.value })
-                }
-                required
-              />
-            </div>
-
-            <div className="mb-3">
-              <label htmlFor="edit-email" className="form-label">
-                Email
-              </label>
-              <input
-                type="email"
-                id="edit-email"
-                name="email"
-                className="form-control"
-                value={newCustomer.email}
-                onChange={(e) =>
-                  setNewCustomer({ ...newCustomer, email: e.target.value })
-                }
-                required
-              />
-            </div>
-
-            <div className="mb-3">
-              <label htmlFor="company-name" className="form-label">
-                Company Name
-              </label>
-              <input
-                type="text"
-                id="company-name"
-                name="companyName"
-                className="form-control"
-                value={newCustomer.companyName}
-                onChange={(e) =>
-                  setNewCustomer({
-                    ...newCustomer,
-                    companyName: e.target.value,
-                  })
-                }
-                required
-              />
-            </div>
-
-            <div className="mb-3">
-              <label htmlFor="edit-date" className="form-label">
-                Date
-              </label>
-
-              <Flatpickr
-                id="edit-date"
-                className="form-control"
-                options={{
-                  dateFormat: "d M, Y",
-                }}
-                value={newCustomer.date}
-                onChange={(date) =>
-                  setNewCustomer({
-                    ...newCustomer,
-                    date: date.length ? date[0].toISOString() : "",
-                  })
-                }
-                required
-              />
-            </div>
-
-            <Row>
-              <Col md={6}>
-                <div className="mb-3">
-                  <label htmlFor="edit-designation" className="form-label">
-                    Designation
-                  </label>
-                  <select
-                    id="edit-designation"
-                    name="designation"
-                    className="form-control"
-                    value={newCustomer.designation}
-                    onChange={(e) =>
-                      setNewCustomer({
-                        ...newCustomer,
-                        designation: parseInt(e.target.value),
-                      })
-                    }
-                    required
-                  >
-                    <option value="">Select Designation</option>
-                    {designations.map((designation) => (
-                      <option key={designation.id} value={designation.id}>
-                        {designation.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </Col>
-
-              <Col md={6}>
-                <div className="mb-3">
-                  <label htmlFor="edit-status" className="form-label">
-                    Status
-                  </label>
-                  <select
-                    id="edit-status"
-                    name="status"
-                    className="form-control"
-                    value={newCustomer.status}
-                    onChange={(e) =>
-                      setNewCustomer({
-                        ...newCustomer,
-                        status: parseInt(e.target.value),
-                      })
-                    }
-                    required
-                  >
-                    <option value="">Select Status</option>
-                    {statuses.map((status) => (
-                      <option key={status.id} value={status.id}>
-                        {status.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </Col>
-            </Row>
-          </ModalBody>
-          <ModalFooter>
-            <button
-              type="button"
-              className="btn btn-light"
-              onClick={() => setmodal_edit(false)}
-            >
-              Cancel
-            </button>
-            <button type="submit" className="btn btn-success">
-              Save Changes
-            </button>
-          </ModalFooter>
-        </form>
-      </Modal>
+      <EditCustomerModal
+        show={modal_edit}
+        handleEditCustomer={handleEditCustomer}
+        newCustomer={newCustomer}
+        setNewCustomer={setNewCustomer}
+        toggle_edit={toggle_edit}
+      />
 
       {/* Remove Modal */}
-      <DeleteConfirmationModal
-        tog_delete={tog_delete}
-        modal_delete={modal_delete}
+      <DeleteModal
+        show={modal_delete}
         confirmDelete={confirmDelete}
+        toggle_delete={toggle_delete}
       />
 
       {/* View Modal */}
       <ViewCustomerDetailsModal
-        tog_view={tog_view}
-        viewRowData={viewRowData}
-        modal_view={modal_view}
+        show={modal_view}
+        data={viewRowData}
+        toggle_view={toggle_view}
       />
     </React.Fragment>
   );
