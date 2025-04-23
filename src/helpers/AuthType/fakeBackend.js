@@ -4,53 +4,12 @@ import * as url from "../url_helper";
 import { accessToken, nodeApiToken } from "../jwt-token-access/accessToken";
 
 import {
-  calenderDefaultCategories,
-  events,
-  defaultevent,
-  direactContact,
-  messages,
-  channelsList,
+  projectsWidgets,
+  activeProjects,
+  projectTasks,
+  teamMembers,
+  overviewCounter,
   projectList,
-  sellersList,
-  transactions,
-  CryptoOrders,
-  deals,
-  mailbox,
-  allData,
-  monthData,
-  halfyearData,
-  allaudiencesMetricsData,
-  monthaudiencesMetricsData,
-  halfyearaudiencesMetricsData,
-  yaeraudiencesMetricsData,
-  todayDeviceData,
-  lastWeekDeviceData,
-  lastMonthDeviceData,
-  currentYearDeviceData,
-  todayBalanceData,
-  lastWeekBalanceData,
-  lastMonthBalanceData,
-  currentYearBalanceData,
-  todayDealData,
-  weeklyDealData,
-  monthlyDealData,
-  yealyDealData,
-  octData,
-  novData,
-  decData,
-  janData,
-  allRevenueData,
-  monthRevenueData,
-  halfYearRevenueData,
-  yearRevenueData,
-  btcPortfolioData,
-  usdPortfolioData,
-  euroPortfolioData,
-  MarketGraphAll,
-  MarketGraphYear,
-  MarketGraphMonth,
-  MarketGraphWeek,
-  MarketGraphHour,
   allProjectData,
   monthProjectData,
   halfyearProjectData,
@@ -59,22 +18,22 @@ import {
   lastWeekData,
   lastMonthData,
   lastquarterData,
-  allMarketplaceData,
-  monthMarketplaceData,
-  halfyearMarketplaceData,
-  yearMarketplaceData,
-  todayaudiencesCountryData,
-  lastWeekaudiencesCountryData,
-  lastMonthaudiencesCountryData,
-  currentyearaudiencesCountryData,
+  dashboardChat,
+  gallery,
+  pricing1,
+  pricing2,
+  pricing3,
+  projects,
+  documents,
+  SearchGallery,
+  news,
+  video,
+  swiper,
   team,
-  jobApplication,
-  folderList,
-  recentFile,
-  todoTaskList,
-  todoCollapse,
-  apiKey,
-  tasklist
+  country,
+  headData,
+  tasklist,
+  AddTeamMember,
 } from "../../common/data";
 
 let users = [
@@ -91,7 +50,7 @@ const fakeBackend = () => {
   // This sets the mock adapter on the default instance
   const mock = new MockAdapter(axios, { onNoMatch: "passthrough" });
 
-  mock.onPost("/post-jwt-register").reply(config => {
+  mock.onPost("/post-jwt-register").reply((config) => {
     const user = JSON.parse(config["data"]);
     users.push(user);
 
@@ -102,10 +61,10 @@ const fakeBackend = () => {
     });
   });
 
-  mock.onPost("/post-jwt-login").reply(config => {
+  mock.onPost("/post-jwt-login").reply((config) => {
     const user = JSON.parse(config["data"]);
     const validUser = users.filter(
-      usr => usr.email === user.email && usr.password === user.password
+      (usr) => usr.email === user.email && usr.password === user.password
     );
 
     return new Promise((resolve, reject) => {
@@ -129,14 +88,14 @@ const fakeBackend = () => {
     });
   });
 
-  mock.onPost("/post-jwt-profile").reply(config => {
+  mock.onPost("/post-jwt-profile").reply((config) => {
     const user = JSON.parse(config["data"]);
 
     const one = config.headers;
 
     let finalToken = one.Authorization;
 
-    const validUser = users.filter(usr => usr.uid === user.idx);
+    const validUser = users.filter((usr) => usr.uid === user.idx);
 
     return new Promise((resolve, reject) => {
       setTimeout(() => {
@@ -146,7 +105,7 @@ const fakeBackend = () => {
             let objIndex;
 
             //Find index of specific object using findIndex method.
-            objIndex = users.findIndex(obj => obj.uid === user.idx);
+            objIndex = users.findIndex((obj) => obj.uid === user.idx);
 
             //Update object's name property.
             users[objIndex].username = user.username;
@@ -166,10 +125,9 @@ const fakeBackend = () => {
     });
   });
 
-  mock.onPost("/social-login").reply(config => {
+  mock.onPost("/social-login").reply((config) => {
     const user = JSON.parse(config["data"]);
     return new Promise((resolve, reject) => {
-
       setTimeout(() => {
         if (user && user.token) {
           // You have to generate AccessToken by jwt. but this is fakeBackend so, right now its dummy
@@ -180,7 +138,10 @@ const fakeBackend = () => {
 
           // JWT AccessToken
           const tokenObj = { accessToken: token, first_name: first_name }; // Token Obj
-          const validUserObj = { token: nodeapiToken, "data": { ...tokenObj, ...user } }; // validUser Obj
+          const validUserObj = {
+            token: nodeapiToken,
+            data: { ...tokenObj, ...user },
+          }; // validUser Obj
           resolve([200, validUserObj]);
         } else {
           reject([
@@ -301,14 +262,14 @@ const fakeBackend = () => {
     });
   });
 
-  mock.onGet(new RegExp(`${url.GET_MESSAGES}/*`)).reply(config => {
+  mock.onGet(new RegExp(`${url.GET_MESSAGES}/*`)).reply((config) => {
     return new Promise((resolve, reject) => {
       setTimeout(() => {
         if (messages) {
           // Passing fake JSON data as response
           const { params } = config;
           const filteredMessages = messages.filter(
-            msg => msg.roomId === params.roomId
+            (msg) => msg.roomId === params.roomId
           );
 
           resolve([200, filteredMessages]);
@@ -319,7 +280,7 @@ const fakeBackend = () => {
     });
   });
 
-  mock.onPost(url.ADD_MESSAGE).reply(config => {
+  mock.onPost(url.ADD_MESSAGE).reply((config) => {
     return new Promise((resolve, reject) => {
       setTimeout(() => {
         if (config.data) {
@@ -332,7 +293,7 @@ const fakeBackend = () => {
     });
   });
 
-  mock.onDelete(url.DELETE_MESSAGE).reply(config => {
+  mock.onDelete(url.DELETE_MESSAGE).reply((config) => {
     return new Promise((resolve, reject) => {
       setTimeout(() => {
         if (config && config.headers) {
@@ -386,7 +347,7 @@ const fakeBackend = () => {
     });
   });
 
-  mock.onDelete(url.DELETE_MAIL).reply(config => {
+  mock.onDelete(url.DELETE_MAIL).reply((config) => {
     return new Promise((resolve, reject) => {
       setTimeout(() => {
         if (config && config.headers) {
@@ -1445,60 +1406,58 @@ const fakeBackend = () => {
     });
   });
 
+  // Kanban Board
+  mock.onGet(url.GET_TASKS).reply(() => {
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        if (tasklist) {
+          // Passing fake JSON data as response
+          resolve([200, tasklist]);
+        } else {
+          reject([400, "Cannot get tasks"]);
+        }
+      });
+    });
+  });
 
-    // Kanban Board
-    mock.onGet(url.GET_TASKS).reply(() => {
-      return new Promise((resolve, reject) => {
-        setTimeout(() => {
-          if (tasklist) {
-            // Passing fake JSON data as response
-            resolve([200, tasklist]);
-          } else {
-            reject([400, "Cannot get tasks"]);
-          }
-        });
+  mock.onPost(url.ADD_TASKS).reply((user) => {
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        if (user && user.data) {
+          // Passing fake JSON data as response
+          resolve([200, user.data]);
+        } else {
+          reject([400, "Cannot add user"]);
+        }
       });
     });
-  
-    mock.onPost(url.ADD_TASKS).reply(user => {
-      return new Promise((resolve, reject) => {
-        setTimeout(() => {
-          if (user && user.data) {
-            // Passing fake JSON data as response
-            resolve([200, user.data]);
-          } else {
-            reject([400, "Cannot add user"]);
-          }
-        });
-      });
-    });
-  
-    mock.onPut(url.UPDATE_TASKS).reply((user) => {
-      return new Promise((resolve, reject) => {
-        setTimeout(() => {
-          if (user && user.data) {
-            // Passing fake JSON data as response
-            resolve([200, user.data]);
-          } else {
-            reject([400, "Cannot update user"]);
-          }
-        });
-      });
-    });
-  
-    mock.onDelete(url.DELETE_TASKS).reply(config => {
-      return new Promise((resolve, reject) => {
-        setTimeout(() => {
-          if (config && config.headers) {
-            // Passing fake JSON data as response
-            resolve([200, config.headers.card]);
-          } else {
-            reject([400, "Cannot delete users"]);
-          }
-        });
-      });
-    });
+  });
 
+  mock.onPut(url.UPDATE_TASKS).reply((user) => {
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        if (user && user.data) {
+          // Passing fake JSON data as response
+          resolve([200, user.data]);
+        } else {
+          reject([400, "Cannot update user"]);
+        }
+      });
+    });
+  });
+
+  mock.onDelete(url.DELETE_TASKS).reply((config) => {
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        if (config && config.headers) {
+          // Passing fake JSON data as response
+          resolve([200, config.headers.card]);
+        } else {
+          reject([400, "Cannot delete users"]);
+        }
+      });
+    });
+  });
 };
 
 export default fakeBackend;
